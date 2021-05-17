@@ -82,7 +82,7 @@
 
 #define APP_BLE_CONN_CFG_TAG            1                                           /**< A tag identifying the SoftDevice BLE configuration. */
 
-#define DEVICE_NAME                     "Nordic_UART"                               /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "NRF_TEST"                               /**< Name of device. Will be included in the advertising data. */
 #define NUS_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN                  /**< UUID type for the Nordic UART Service (vendor specific). */
 
 #define APP_BLE_OBSERVER_PRIO           3                                           /**< Application's BLE observer priority. You shouldn't need to modify this value. */
@@ -583,8 +583,8 @@ static void uart_init(void)
         .tx_pin_no    = TX_PIN_NUMBER,
         .rts_pin_no   = RTS_PIN_NUMBER,
         .cts_pin_no   = CTS_PIN_NUMBER,
-        .flow_control = APP_UART_FLOW_CONTROL_DISABLED,//Ó²¼þÁ÷¿ØÊ§ÄÜ
-        .use_parity   = false,//ÎÞÐ£Ñé
+        .flow_control = APP_UART_FLOW_CONTROL_DISABLED,//Ó²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½
+        .use_parity   = false,//ï¿½ï¿½Ð£ï¿½ï¿½
 #if defined (UART_PRESENT)
         .baud_rate    = NRF_UART_BAUDRATE_115200
 #else
@@ -598,7 +598,7 @@ static void uart_init(void)
                        uart_event_handle,
                        APP_IRQ_PRIORITY_LOWEST,
                        err_code);
-    APP_ERROR_CHECK(err_code);//³ÌÐò´íÎó¼ì²éº¯Êý
+    APP_ERROR_CHECK(err_code);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½éº¯ï¿½ï¿½
 }
 /**@snippet [UART Initialization] */
 
@@ -654,7 +654,7 @@ static void buttons_leds_init(bool * p_erase_bonds)
 static void log_init(void)
 {
     ret_code_t err_code = NRF_LOG_INIT(NULL);
-    APP_ERROR_CHECK(err_code);//º¯Êý´íÎó¼ì²é
+    APP_ERROR_CHECK(err_code);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 }
