@@ -2,8 +2,9 @@ PROJECT_NAME     := ble_app_uart_pca10040e_s112
 TARGETS          := nrf52810_xxaa
 OUTPUT_DIRECTORY := _build
 
-SDK_ROOT := ../../../../../..
-PROJ_DIR := ../../..
+SDK_ROOT := ./nRF5_SDK_17.0.0_9d13099
+PROJ_DIR := .
+GNU_INSTALL_ROOT = /opt/gcc-arm-none-eabi-9-2019-q4-major/bin/
 
 $(OUTPUT_DIRECTORY)/nrf52810_xxaa.out: \
   LINKER_SCRIPT  := ble_app_uart_gcc_nrf52.ld
@@ -129,7 +130,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/ble/ble_services/ble_cts_c \
   $(SDK_ROOT)/components/libraries/crc16 \
   $(SDK_ROOT)/components/libraries/util \
-  ../config \
+  ./ \
   $(SDK_ROOT)/components/libraries/usbd/class/cdc \
   $(SDK_ROOT)/components/libraries/csense \
   $(SDK_ROOT)/components/libraries/balloc \
@@ -285,7 +286,7 @@ flash_softdevice:
 erase:
 	nrfjprog -f nrf52 --eraseall
 
-SDK_CONFIG_FILE := ../config/sdk_config.h
+SDK_CONFIG_FILE := ./sdk_config.h
 CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 sdk_config:
 	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
