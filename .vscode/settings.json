@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "array": "c",
+        "iterator": "c",
+        "string": "c",
+        "string_view": "c",
+        "vector": "c",
+        "__locale": "cpp",
+        "locale": "cpp",
+        "ds18b20.h": "c",
+        "stdint.h": "c",
+        "nrf_pwr_mgmt.h": "c",
+        "project.h": "c"
+    }
+}
