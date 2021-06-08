@@ -290,3 +290,8 @@ SDK_CONFIG_FILE := ./sdk_config.h
 CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 sdk_config:
 	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
+
+
+run:
+	@echo "Try to run MCU"
+	-JLinkExe -device NRF52805_XXAA -if SWD -speed 24000 -RTTTelnetPort 8888 -autoconnect 1
