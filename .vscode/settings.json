@@ -10,6 +10,8 @@
         "ds18b20.h": "c",
         "stdint.h": "c",
         "nrf_pwr_mgmt.h": "c",
-        "project.h": "c"
+        "project.h": "c",
+        "ble_advertising.h": "c",
+        "cstdlib": "c"
     }
 }
