@@ -116,7 +116,7 @@ static uint16_t UART_RX_STA = 0;
 APP_TIMER_DEF(m_uart_timeout_timer_id);
 
 
-APP_TIMER_DEF(m_task_timeout_timer_id);
+// APP_TIMER_DEF(m_task_timeout_timer_id);
 #define TASK_TIMEOUT APP_TIMER_TICKS(1000)
 
 
@@ -128,12 +128,16 @@ ble_gap_adv_params_t g_adv_params;
 static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID;            /**< Handle of the current connection. */
 static uint8_t  m_adv_handle = BLE_GAP_ADV_SET_HANDLE_NOT_SET;      /**< Advertising handle used to identify an advertising set. */
 static uint8_t  m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];       /**< Buffer for storing an encoded advertising set. */
-static uint8_t  m_adv_manuf_data[20] = {0xA3, 0x01, 0x01, 0x00, 
-                                        0x12, 0x00, 0x01, 0x00, 
-                                        0x01, 0x01, 0x00, 0x00, 
-                                        0x9B, 0xC8, 0xA4, 0x3F, 
-                                        0x23, 0xAC, 0xC7, 0x72};
-static uint8_t  m_adv_manuf_data_size= 20;
+static uint8_t  m_adv_manuf_data[20];
+static uint8_t  m_adv_manuf_data_size= 0;
+
+/*
+{
+    "t" : -20.6,
+    "battery": 100,
+    "type" : "S3"
+}
+*/
 
 BLE_NUS_DEF(m_nus, NRF_SDH_BLE_TOTAL_LINK_COUNT); /**< BLE NUS service instance. */
 NRF_BLE_QWR_DEF(m_qwr);                           /**< Context for the Queued Write module.*/
@@ -156,89 +160,13 @@ static ble_gap_adv_data_t m_adv_data =
     }
 };
 
-#pragma pack(1)
-typedef struct SERVICE_INFO_T{
-    uint8_t type;
-    uint8_t cmd;
-    uint32_t rh; // 100倍
-    uint32_t t;  // 放大10倍
-    uint16_t status;
-    uint8_t mac[6];
-    uint8_t ran1;
-    uint8_t ran2;
-}SERVICE_INFO_T;
-
-typedef struct DEVICE_INFO_T{
-    uint8_t type;
-    uint8_t cmd;
-    uint8_t battery;
-    uint16_t tx_rssi;
-    uint16_t rx_rssi;
-    uint8_t mac[6];
-    uint8_t state;
-    uint8_t ran1;
-    uint8_t ran2;
-}DEVICE_INFO_T;
-#pragma pack()
-
-static uint8_t sensor_info_data[] = {   0xA3, 0x01, 0x01, 0x00, 
-                                        0x12, 0x00, 0x01, 0x00, 
-                                        0x01, 0x01, 0x00, 0x00, 
-                                        0x9B, 0xC8, 0xA4, 0x3F, 
-                                        0x23, 0xAC, 0xC7, 0x72};
-
-static uint8_t device_info_data[] = {   0xA3, 0x03, 0x64, 0x18, 
-                                        0xb3, 0x2b, 0xb3, 0x9b, 
-                                        0xc8, 0xa4, 0x3f, 0x23, 
-                                        0xac, 0x00, 0x7a, 0xD2};
-
-
 // const nrf_drv_timer_t TIMER_UART_RX = NRF_DRV_TIMER_INSTANCE(1);
 
 static uint16_t m_ble_nus_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - 3; /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
 
-/*
-#define ADV_DATA_SENSOR_POS_OFFSET 7
-static uint8_t m_enc_advdata_sensor[]={
-    2, 0x01, 0x06,
-    23,0xff, 0x39, 0x06, 0xA3, 0x01, 0x01, 0x00, 0x12, 0x00, 0x01, 0x00, 0x01, 0x01, 0x00, 0x00, 
-                   0x9B, 0xC8, 0xA4, 0x3F, 0x23, 0xAC, 0xC7, 0x72,
-    3, 0x09, 0x53, 0x33
-};
 
-#define ADV_DATA_INFO_POS_OFFSET 7
-static uint8_t m_enc_advdata_info[]={
-    2, 0x01, 0x06,
-    23,0xff, 0x39, 0x06, 0xA3, 0x01, 0x01, 0x00, 0x12, 0x00, 0x01, 0x00, 0x01, 0x01, 0x00, 0x00, 
-                   0x9B, 0xC8, 0xA4, 0x3F, 0x23, 0xAC, 0xC7, 0x72,
-    3, 0x09, 0x53, 0x33
-    
-    // 2, 0x01, 0x06,
-    // 19,0xff, 0x39, 0x06, 0xA3, 0x03, 
-                        //  0x64, 0x18, 0xb3, 0x2b, 0xb3, 0x9b, 0xc8, 0xa4, 0x3f, 0x23, 0xac, 0x00, 0x7a, 0xD2,
-    //3, 0x09, 0x53, 0x33
-};
-*/
-
-// uint8_t m_enc_advdata_info[20];
-
-
-
-//tatic uint8_t manuf_data_array[20]={0xA3, 0x01, 0x01, 0x00, 0x12, 0x00, 0x01, 0x00, 0x01, 0x01, 0x00, 0x00, 
-//                   0x9B, 0xC8, 0xA4, 0x3F, 0x23, 0xAC, 0xC7, 0x72};
-
-
-/**@brief Struct that contains pointers to the encoded advertising data. */
-// static ble_gap_adv_data_t m_adv_data = {
-//     .adv_data = {
-//         .p_data = m_enc_advdata_info,
-//         .len = BLE_GAP_ADV_SET_DATA_SIZE_MAX},
-//     .scan_rsp_data = {.p_data = NULL, .len = 0}};
-
-//
 static void AT_cmd_handle(uint8_t *pBuffer, uint16_t length);
 static uint8_t AT_cmd_check_valid(uint8_t *pBuffer, uint16_t length);
-
 
 
 //对应int32大小的成员 的转换 范例 
@@ -303,6 +231,8 @@ static void uart_timeout_timer_handler(void *p_context)
  *
  * @details Starts application wdt feed timers.
  */
+
+/*
 static void task_timeout_timers_start(void)
 {
     ret_code_t err_code;
@@ -315,19 +245,8 @@ static uint8_t counter = 0;
 static void task_timeout_timer_handler(void *p_context)
 {
     // NRF_LOG_INFO("RUN TASK");
-    counter++;
-    if(counter & 0x01) {
-        memcpy(m_adv_manuf_data, sensor_info_data, sizeof(sensor_info_data));
-        m_adv_manuf_data_size = sizeof(sensor_info_data);
-        // NRF_LOG_INFO("sensor info size= %d", m_adv_manuf_data_size);
-    }else {
-        memcpy(m_adv_manuf_data, device_info_data, sizeof(device_info_data));
-        m_adv_manuf_data_size = sizeof(device_info_data);
-        // NRF_LOG_INFO("device info size= %d", m_adv_manuf_data_size);
-    }
     advertising_update();
-    NRF_LOG_HEXDUMP_INFO(sensor_info_data, sizeof(SERVICE_INFO_T));
-    NRF_LOG_HEXDUMP_INFO(device_info_data, sizeof(DEVICE_INFO_T));
+
 }
 
 
@@ -339,6 +258,7 @@ static void task_timer_init(void){
                                 task_timeout_timer_handler);
     APP_ERROR_CHECK(err_code);
 }
+*/
 
 /**@brief Function for initializing the timer module.
  */
@@ -350,7 +270,7 @@ static void timers_init(void)
                                 APP_TIMER_MODE_SINGLE_SHOT,
                                 uart_timeout_timer_handler);
     APP_ERROR_CHECK(err_code);
-    task_timer_init();
+    // task_timer_init();
 
 }
 
@@ -765,7 +685,7 @@ static void advertising_init(void)
     // Build and set Tile advertising data.
     memset(&g_advdata, 0, sizeof(g_advdata));
 
-    g_advdata.name_type               = BLE_ADVDATA_FULL_NAME;
+    g_advdata.name_type               = BLE_ADVDATA_NO_NAME;
     g_advdata.include_appearance      = false;
     g_advdata.flags                   = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 
@@ -979,6 +899,7 @@ char *Util_convertBdAddr2Str(uint8_t *pAddr)
     return str;
 }
 
+/*
 uint8_t ad_data_dispatch(uint8_t *buf, uint8_t len, uint32_t *t_p, uint32_t *bat_p)
 {
     if (buf == NULL || len < 5)
@@ -1036,6 +957,75 @@ uint8_t ad_data_dispatch(uint8_t *buf, uint8_t len, uint32_t *t_p, uint32_t *bat
     }
     return -2;
 }
+*/
+
+
+uint8_t ad_data_dispatch(uint8_t *buf, uint8_t len, char *t_p, char *bat_p)
+{
+    if (buf == NULL || len < 5)
+        return -1; // Frame invaild
+
+    //
+    char *delim = "+";
+    char *p;
+    // NRF_LOG_INFO("%s ", buf);
+
+    p = strtok((char *)buf, delim); // 切 AT 出来
+    if (!p)
+    {
+        return -2; // PARSE FAIL
+    }
+    else
+    {
+        NRF_LOG_INFO("STR1: %s", p);
+    };
+
+    p = strtok(NULL, delim); // 切 addr 出来
+    if (!p)
+    {
+        return -2; // PARSE FAIL
+    }
+    else
+    {
+        NRF_LOG_INFO("STR2: %s",p);
+    };
+
+    p = strtok(NULL, delim); // 切  temperature 出来
+    if (!p)
+    {
+        return -2; // PARSE FAIL
+    }
+    else
+    {
+        strcpy(t_p, p);
+        NRF_LOG_INFO("STR3: %s %s", p, t_p);
+
+    };
+
+    p = strtok(NULL, delim); // 切 battery 出来
+    if (!p)
+    {
+        return -2; // PARSE FAIL
+    }
+    else
+    {
+        strcpy(bat_p, p);
+        //bat_p = p;
+        NRF_LOG_INFO("STR4:%s %s", p, bat_p);
+        return 0;
+    }
+    return -2;
+}
+
+
+void _clear_tail(char *str){
+    char *tmp = NULL;
+    if ((tmp = strstr(str, "\r")))
+    {
+        *tmp = '\0';
+    }
+}
+
 /**@brief Function for process AT command.
  *
  * @param[in] pBuffer   pointer of string.
@@ -1109,26 +1099,17 @@ static void AT_cmd_handle(uint8_t *pBuffer, uint16_t length)
         APP_ERROR_CHECK(err_code);
   
         // 准备数据结构
-        uint32_t t_value_x10 =0;
-        uint32_t b_value = 0;
+        char t_str[7] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+        char bat_str[5] = {0x00, 0x00, 0x00, 0x00, 0x00};
 
         // to do 解析出温度和电量
-        int8_t res = ad_data_dispatch(pBuffer, length, &t_value_x10, &b_value);
+        int8_t res = ad_data_dispatch(pBuffer, length, t_str, bat_str);
+        NRF_LOG_HEXDUMP_INFO(t_str, 7);
+        NRF_LOG_HEXDUMP_INFO(bat_str, 5);
+        
         if (res)
             return; // 解析不正确 直接退出
             
-        NRF_LOG_INFO("T=%d, BAT=%d", t_value_x10, b_value);
-
-        DEVICE_INFO_T *di_p =(DEVICE_INFO_T *) (device_info_data);
-        SERVICE_INFO_T *si_p =( SERVICE_INFO_T *) (sensor_info_data); 
-        // 
-        di_p->battery = (b_value&0xFF);
-        memcpy(di_p->mac, device_addr.addr, 6);
-        //
-        memcpy(si_p->mac, device_addr.addr, 6); 
-        si_p->rh = swap_int32(0x00000000 | 0x01000000);
-        si_p->t = swap_int32((t_value_x10) | 0x01000000);
-
         if (err_code == NRF_SUCCESS)
         {
             printf("AT+NFTH:OK\r\n");
@@ -1137,7 +1118,20 @@ static void AT_cmd_handle(uint8_t *pBuffer, uint16_t length)
         {
             printf("AT+NFTH:FAIL\r\n");
         }
-        APP_ERROR_CHECK(err_code);
+        
+        memset((uint8_t *)m_adv_manuf_data, 0x00, sizeof(m_adv_manuf_data));
+        strcat((char *)m_adv_manuf_data, "{\"t\":");
+        _clear_tail(t_str);
+        strcat((char *)m_adv_manuf_data, t_str);
+        strcat((char *)m_adv_manuf_data, ",\"b\":");
+        _clear_tail(bat_str);
+        strcat((char *)m_adv_manuf_data, bat_str);
+        strcat((char *)m_adv_manuf_data, "}");
+        m_adv_manuf_data_size = strlen((char *)m_adv_manuf_data);
+        NRF_LOG_INFO("MANF=%s Size=%d", m_adv_manuf_data, m_adv_manuf_data_size );
+        if(m_adv_manuf_data_size < 20){ // 检验数据有效性
+            advertising_update();
+        }
     }
 }
 
@@ -1162,7 +1156,7 @@ int main(void)
 
     advertising_start();
 
-    task_timeout_timers_start();
+    // task_timeout_timers_start();
 
     // Enter main loop.
     for (;;)
