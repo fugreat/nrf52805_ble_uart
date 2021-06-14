@@ -314,18 +314,20 @@ static void task_timeout_timers_start(void)
 static uint8_t counter = 0;
 static void task_timeout_timer_handler(void *p_context)
 {
-    NRF_LOG_INFO("RUN TASK");
+    // NRF_LOG_INFO("RUN TASK");
     counter++;
     if(counter & 0x01) {
         memcpy(m_adv_manuf_data, sensor_info_data, sizeof(sensor_info_data));
         m_adv_manuf_data_size = sizeof(sensor_info_data);
-        NRF_LOG_INFO("sensor info size= %d", m_adv_manuf_data_size);
+        // NRF_LOG_INFO("sensor info size= %d", m_adv_manuf_data_size);
     }else {
         memcpy(m_adv_manuf_data, device_info_data, sizeof(device_info_data));
         m_adv_manuf_data_size = sizeof(device_info_data);
-        NRF_LOG_INFO("device info size= %d", m_adv_manuf_data_size);
+        // NRF_LOG_INFO("device info size= %d", m_adv_manuf_data_size);
     }
     advertising_update();
+    NRF_LOG_HEXDUMP_INFO(sensor_info_data, sizeof(SERVICE_INFO_T));
+    NRF_LOG_HEXDUMP_INFO(device_info_data, sizeof(DEVICE_INFO_T));
 }
 
 
@@ -748,7 +750,7 @@ void uart_event_handle(app_uart_evt_t *p_event)
 static void advertising_init(void)
 {
 
-    NRF_LOG_INFO("advertising_init");
+    // NRF_LOG_INFO("advertising_init");
     ret_code_t            err_code;
 
     // Set Tile default advertising parameters.
@@ -796,7 +798,7 @@ static void advertising_init(void)
 /* Function to change Advertising data */
 void advertising_update(void)
 {
-    NRF_LOG_INFO("advertising_update");
+    // NRF_LOG_INFO("advertising_update");
     ret_code_t err_code;
 
     /* Stop Advertising, so as to enable it to be updated */
@@ -913,12 +915,12 @@ void uart_event_handler(app_uart_evt_t *p_event)
 }
 /**@snippet [Handling the data received over UART] */
 
-//#define MY_RX_PIN_NUMBER 14
-//#define MY_TX_PIN_NUMBER 20
+#define MY_RX_PIN_NUMBER 14
+#define MY_TX_PIN_NUMBER 20
 
 
-#define MY_RX_PIN_NUMBER 20
-#define MY_TX_PIN_NUMBER 14
+// #define MY_RX_PIN_NUMBER 20
+// #define MY_TX_PIN_NUMBER 14
 /**@brief  Function for initializing the UART module.
  *
  * @param[in] baudrate   uart baudrate 
@@ -994,7 +996,7 @@ uint8_t ad_data_dispatch(uint8_t *buf, uint8_t len, uint32_t *t_p, uint32_t *bat
     }
     else
     {
-        NRF_LOG_INFO("ad_data_dispatch STR1: %s", p);
+        NRF_LOG_INFO("STR1: %s", p);
     };
 
     p = strtok(NULL, delim); // 切 addr 出来
@@ -1004,7 +1006,7 @@ uint8_t ad_data_dispatch(uint8_t *buf, uint8_t len, uint32_t *t_p, uint32_t *bat
     }
     else
     {
-        NRF_LOG_INFO("ad_data_dispatch STR2: %s",p);
+        NRF_LOG_INFO("STR2: %s",p);
     };
 
     p = strtok(NULL, delim); // 切  temperature 出来
@@ -1016,7 +1018,7 @@ uint8_t ad_data_dispatch(uint8_t *buf, uint8_t len, uint32_t *t_p, uint32_t *bat
     {
         float v = atof(p)*10;
         *t_p = (uint32_t) v;
-        NRF_LOG_INFO("ad_data_dispatch STR3: %s %d", p, *t_p);
+        NRF_LOG_INFO("STR3: %s %d", p, *t_p);
 
     };
 
@@ -1028,7 +1030,7 @@ uint8_t ad_data_dispatch(uint8_t *buf, uint8_t len, uint32_t *t_p, uint32_t *bat
     else
     {
         *bat_p = atoi(p);
-        NRF_LOG_INFO("ad_data_dispatch STR4:%s %d", p, *bat_p);
+        NRF_LOG_INFO("STR4:%s %d", p, *bat_p);
 
         return 0;
     }
@@ -1048,12 +1050,50 @@ static void AT_cmd_handle(uint8_t *pBuffer, uint16_t length)
     if ((length == 5) && (strncmp((char *)pBuffer, "AT?\r\n", 5) == 0))
     {
         printf("AT:OK\r\n");
+    } else if ((length == 10) && (strncmp((char *)pBuffer, "AT+BAUD8\r\n", 10) == 0))
+    {
+        printf("AT+BAUD8:OK\r\n");
+        NRF_LOG_INFO("AT+BAUD8:OK\r\n");
+
+        // 41 54 2B 42 41 55 44 38|AT+BAUD8
+        //  <info> app:  0D 0A 
+    }else if ((length == 13) && (strncmp((char *)pBuffer, "AT+STARTEN0\r\n", 13) == 0))
+    {
+        printf("AT+STARTEN0:OK\r\n");
+        NRF_LOG_INFO("AT+STARTEN0:OK\r\n");
+
+        // 41 54 2B 42 41 55 44 38|AT+BAUD8
+        //  <info> app:  0D 0A 
+    } else if ((length == 11) && (strncmp((char *)pBuffer, "AT+ADVIN0\r\n", 11) == 0))
+    {
+        printf("AT+ADVIN0:OK\r\n");
+        NRF_LOG_INFO("AT+ADVIN0:OK\r\n");
+
+        // 41 54 2B 42 41 55 44 38|AT+BAUD8
+        //  <info> app:  0D 0A 
+    } else if ((length == 10) && (strncmp((char *)pBuffer, "AT+POWR0\r\n", 10) == 0))
+    {
+        printf("AT+POWR0:OK\r\n");
+        NRF_LOG_INFO("AT+POWR0:OK\r\n");
+
+        // 41 54 2B 42 41 55 44 38|AT+BAUD8
+        //  <info> app:  0D 0A 
+    }
+     else if ((length == 14) && (strncmp((char *)pBuffer, "AT+NAME", 7) == 0))
+    {
+
+        printf("AT+NAMETH001:OK\r\n");
+        NRF_LOG_INFO("AT+NAMETH001:OK\r\n");
+        // 41 54 2B 42 41 55 44 38|AT+BAUD8
+        //  <info> app:  0D 0A 
     }
 
     // System soft reset: AT+RESET\r\n
-    else if ((length == 10) && (strncmp((char *)pBuffer, "AT+RESET\r\n", 10) == 0))
+    else if ((length == 8) && (strncmp((char *)pBuffer, "AT+RST\r\n", 8) == 0))
     {
-        NVIC_SystemReset(); // Restart the system by default
+       // NVIC_SystemReset(); // Restart the system by default
+        printf("AT+RST:OK\r\n");
+        NRF_LOG_INFO("AT+RST:OK\r\n");
     }
 
     else if ((length >= 10) && (strncmp((char *)pBuffer, "AT+NFTH", 7) == 0))
@@ -1077,7 +1117,7 @@ static void AT_cmd_handle(uint8_t *pBuffer, uint16_t length)
         if (res)
             return; // 解析不正确 直接退出
             
-        NRF_LOG_INFO("%d %d", t_value_x10, b_value);
+        NRF_LOG_INFO("T=%d, BAT=%d", t_value_x10, b_value);
 
         DEVICE_INFO_T *di_p =(DEVICE_INFO_T *) (device_info_data);
         SERVICE_INFO_T *si_p =( SERVICE_INFO_T *) (sensor_info_data); 
@@ -1088,9 +1128,6 @@ static void AT_cmd_handle(uint8_t *pBuffer, uint16_t length)
         memcpy(si_p->mac, device_addr.addr, 6); 
         si_p->rh = swap_int32(0x00000000 | 0x01000000);
         si_p->t = swap_int32((t_value_x10) | 0x01000000);
-
-        NRF_LOG_HEXDUMP_INFO(si_p, sizeof(SERVICE_INFO_T));
-        NRF_LOG_HEXDUMP_INFO(di_p, sizeof(DEVICE_INFO_T));
 
         if (err_code == NRF_SUCCESS)
         {
