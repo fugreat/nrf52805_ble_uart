@@ -70,6 +70,8 @@
 
 #include "app_timer.h"
 #include "nrf_drv_timer.h"
+#include "nrf_gpio.h"
+#include "nrf_delay.h"
 
 #if defined(UART_PRESENT)
 #include "nrf_uart.h"
@@ -835,8 +837,15 @@ void uart_event_handler(app_uart_evt_t *p_event)
 }
 /**@snippet [Handling the data received over UART] */
 
-#define MY_RX_PIN_NUMBER 14
-#define MY_TX_PIN_NUMBER 20
+#define MY_RX_PIN_NUMBER 20
+#define MY_TX_PIN_NUMBER 14
+#define MY_LED_PIN_NUMBER 0
+
+ #define INIT_LED()   nrf_gpio_cfg_output(MY_LED_PIN_NUMBER)
+ #define SET_LED()  nrf_gpio_pin_set(MY_LED_PIN_NUMBER)
+ #define CLEAR_LED()  nrf_gpio_pin_clear(MY_LED_PIN_NUMBER)
+ #define TOGGLE_LED()  nrf_gpio_pin_toggle(MY_LED_PIN_NUMBER)
+
 
 
 // #define MY_RX_PIN_NUMBER 20
@@ -1061,6 +1070,13 @@ static void AT_cmd_handle(uint8_t *pBuffer, uint16_t length)
 
         // 41 54 2B 42 41 55 44 38|AT+BAUD8
         //  <info> app:  0D 0A 
+    } else if ((length == 11) && (strncmp((char *)pBuffer, "AT+ADVIN1\r\n", 11) == 0))
+    {
+        printf("AT+ADVIN1:OK\r\n");
+        NRF_LOG_INFO("AT+ADVIN1:OK\r\n");
+
+        // 41 54 2B 42 41 55 44 38|AT+BAUD8
+        //  <info> app:  0D 0A 
     } else if ((length == 10) && (strncmp((char *)pBuffer, "AT+POWR0\r\n", 10) == 0))
     {
         printf("AT+POWR0:OK\r\n");
@@ -1089,6 +1105,7 @@ static void AT_cmd_handle(uint8_t *pBuffer, uint16_t length)
     else if ((length >= 10) && (strncmp((char *)pBuffer, "AT+NFTH", 7) == 0))
     {
 
+        TOGGLE_LED();
         // 获取mac地址
         ble_gap_addr_t device_addr;
         #if (NRF_SD_BLE_API_VERSION >= 3)
@@ -1141,6 +1158,9 @@ static void AT_cmd_handle(uint8_t *pBuffer, uint16_t length)
 int main(void)
 {
     // Initialize.
+
+    INIT_LED();
+    SET_LED();
     log_init();
     timers_init();
     uart_init(NRF_UARTE_BAUDRATE_115200);
