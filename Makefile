@@ -4,7 +4,7 @@ OUTPUT_DIRECTORY := _build
 
 SDK_ROOT := ./nRF5_SDK_17.0.0_9d13099
 PROJ_DIR := .
-GNU_INSTALL_ROOT = /opt/gcc-arm-none-eabi-9-2019-q4-major/bin/
+GNU_INSTALL_ROOT = /opt/gcc-arm-none-eabi-9-2020-q2-update/bin/
 
 $(OUTPUT_DIRECTORY)/nrf52810_xxaa.out: \
   LINKER_SCRIPT  := ble_app_uart_gcc_nrf52.ld

@@ -12,6 +12,7 @@
         "nrf_pwr_mgmt.h": "c",
         "project.h": "c",
         "ble_advertising.h": "c",
-        "cstdlib": "c"
+        "cstdlib": "c",
+        "nrf_log.h": "c"
     }
 }
